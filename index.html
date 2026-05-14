@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CE++ Code Editor - Fast, Free Code Editor for Windows</title>
+  <meta name="description" content="CE++ is a fast, free, and open-source code editor for Windows. Supports syntax highlighting for 18+ languages, built-in code runner, multi-tab editing, and light/dark themes." />
+  <meta name="keywords" content="CE++, code editor, free code editor, Windows code editor, open source, syntax highlighting, CodeEditorLib" />
+  <meta name="author" content="Ari Sohandri Putra" />
+  <meta property="og:title" content="CE++ — Fast, Free Code Editor for Windows" />
+  <meta property="og:description" content="A fast, free, and open-source code editor for Windows with syntax highlighting, multi-tab editing, and built-in code runner." />
+  <meta property="og:url" content="https://ce-plus.github.io/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="CE++ — Fast, Free Code Editor for Windows" />
+  <meta name="twitter:description" content="A fast, free, and open-source code editor for Windows." />
+  <link rel="canonical" href="https://ce-plus.github.io/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f9f9f8;
+      --surface: #ffffff;
+      --border: #e5e5e3;
+      --border-light: #f0f0ee;
+      --text: #1a1a18;
+      --muted: #6b6b67;
+      --accent: #0078d4;
+      --accent-hover: #005fa3;
+      --accent-faint: #e8f2fc;
+      --green: #16a34a;
+      --green-faint: #f0fdf4;
+      --mono: 'DM Mono', 'Consolas', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --radius: 8px;
+      --radius-lg: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111110;
+        --surface: #1c1c1a;
+        --border: #2e2e2b;
+        --border-light: #252523;
+        --text: #e8e8e4;
+        --muted: #888884;
+        --accent: #3b9ede;
+        --accent-hover: #60b0e8;
+        --accent-faint: #0e2336;
+        --green: #4ade80;
+        --green-faint: #0a1f12;
+      }
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+     
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-logo img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+    .nav-logo-text {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13.5px;
+      font-weight: 400;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: var(--radius);
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+      background: var(--border-light);
+      text-decoration: none;
+    }
+    .nav-cta {
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      color: var(--accent) !important;
+      border: 1px solid var(--border) !important;
+    }
+    .nav-cta:hover {
+      background: var(--accent-faint) !important;
+      border-color: var(--accent) !important;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 80px 0 64px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--green);
+      background: var(--green-faint);
+      border: 1px solid color-mix(in srgb, var(--green) 20%, transparent);
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      letter-spacing: 0.02em;
+    }
+    .badge svg {
+      width: 13px;
+      height: 13px;
+      stroke: var(--green);
+      fill: none;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+    .hero-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      display: block;
+      object-fit: contain;
+    }
+    /* Logo placeholder */
+    .hero-logo-placeholder {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 11px;
+      font-family: var(--mono);
+    }
+    h1 {
+      font-size: clamp(36px, 6vw, 52px);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    h1 span {
+      font-family: var(--mono);
+      font-weight: 500;
+    }
+    .hero-desc {
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s;
+      cursor: pointer;
+      border: none;
+      font-family: var(--sans);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      color: #fff;
+      text-decoration: none;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover {
+      background: var(--surface);
+      border-color: var(--muted);
+      text-decoration: none;
+      color: var(--text);
+    }
+    .btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    /* ── Screenshot ── */
+    .screenshot-area {
+      margin: 0 0 96px;
+    }
+    .screenshot-frame {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .screenshot-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .screenshot-img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    /* Screenshot placeholder */
+    .screenshot-placeholder {
+      width: 100%;
+      aspect-ratio: 16/9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 13px;
+      font-family: var(--mono);
+    }
+    .screenshot-placeholder svg {
+      width: 36px;
+      height: 36px;
+      stroke: var(--border);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    /* ── Sections ── */
+    section { padding: 72px 0; }
+    section + section { border-top: 1px solid var(--border-light); }
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: clamp(24px, 4vw, 32px);
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .section-desc {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 560px;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    /* ── Feature grid ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .feature-card {
+      background: var(--surface);
+      padding: 28px 24px;
+    }
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-faint);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .feature-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 1.8;
+      flex-shrink: 0;
+    }
+    .feature-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .feature-text {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── Language pills ── */
+    .lang-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 32px;
+    }
+    .lang-pill {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 100px;
+      letter-spacing: 0.01em;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .lang-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Lib section ── */
+    .lib-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: start;
+    }
+    .lib-card h3 {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .lib-card p {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.65;
+    }
+    .lib-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Shortcuts table ── */
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .shortcut-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      padding: 12px 20px;
+      font-size: 13.5px;
+    }
+    .shortcut-row:hover {
+      background: var(--bg);
+    }
+    .shortcut-desc {
+      color: var(--muted);
+    }
+    kbd {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-bottom-width: 2px;
+      color: var(--text);
+      padding: 2px 8px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    /* ── Install ── */
+    .install-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .install-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: var(--surface);
+      padding: 20px 24px;
+    }
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-faint);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-content h4 {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .step-content p {
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+    .step-content code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 5px;
+      color: var(--text);
+      display: inline-block;
+      margin-top: 6px;
+    }
+
+    /* ── Extra screenshots ── */
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .screenshot-mini-frame {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .screenshot-mini-bar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .dot-sm { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .screenshot-mini-img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .screenshot-mini-placeholder {
+      width: 100%;
+      aspect-ratio: 4/3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+    .screenshot-mini-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      padding: 8px 12px 10px;
+      text-align: center;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      margin-top: 16px;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .footer-logo img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+    .footer-logo-placeholder {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+    .footer-text {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .mit-badge {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--green);
+      background: var(--green-faint);
+      border: 1px solid color-mix(in srgb, var(--green) 20%, transparent);
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero { padding: 56px 0 48px; }
+      .lib-card { grid-template-columns: 1fr; }
+      .lib-actions { flex-direction: row; }
+      .shortcuts-grid { grid-template-columns: 1fr; }
+      .screenshot-grid { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <div style="width:26px;height:26px;background:var(--accent-faint);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+       <img src="img/logo.png" alt="CE++ Logo" />
+      </div>
+      <span class="nav-logo-text">CE++</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#languages">Languages</a></li>
+      <li><a href="#library">Library</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="https://github.com/arisohandriputra/CodeEditorLib" class="nav-cta">GitHub ↗</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="container">
+  <div class="hero">
+    <div class="badge">
+      Open Source · MIT License
+    </div>
+
+    <div class="hero-logo-placeholder">
+     <img src="img/logo.png" alt="CE++ Logo" />
+    </div>
+
+    <h1>The fast, free<br/><span>Code Editor</span> for Windows</h1>
+    <p class="hero-desc">
+      CE++ is a lightweight, open-source code editor designed for developers who value speed and simplicity. Write, edit, and run code across 18+ languages - no complexity, no bloat.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/arisohandriputra/CodeEditorLib/releases/download/1.1/CE++_Setup_v1.1.exe" class="btn btn-primary">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download for Windows
+      </a>
+      <a href="https://github.com/arisohandriputra/CodeEditorLib" class="btn btn-outline">
+        <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+
+    <img src="img/Main_Screenshot.PNG" alt="CE++ editor screenshot" class="screenshot-img"> 
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Features</div>
+    <h2>Everything you need to write code</h2>
+    <p class="section-desc">Built to stay out of your way. Clean interface, fast startup, and the tools developers actually use.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><polyline points="16,18 22,12 16,6"/><polyline points="8,6 2,12 8,18"/></svg>
+        </div>
+        <div class="feature-title">Syntax Highlighting</div>
+        <div class="feature-text">Rich color syntax for 18+ programming languages powered by CodeEditorLib. Automatic detection based on file extension.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <div class="feature-title">Built-in Code Runner</div>
+        <div class="feature-text">Run Python, JavaScript, C/C++, Ruby, Java, and HTML directly from the editor. Output appears in the integrated panel below.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="feature-title">Multi-Tab Editing</div>
+        <div class="feature-text">Work with multiple files at once in a clean tab interface. Each tab tracks unsaved changes and supports drag-and-drop file opening.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </div>
+        <div class="feature-title">7 Built-in Themes</div>
+        <div class="feature-text">Choose from 7 beautiful built-in themes, including light, dark, and colorful styles. Your selected theme is saved automatically for the next launch.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        </div>
+        <div class="feature-title">Code Minimap</div>
+        <div class="feature-text">Navigate large files easily with the built-in minimap. Toggle it on or off from the View menu. Line numbers can also be toggled.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        </div>
+        <div class="feature-title">Multi-Language UI</div>
+        <div class="feature-text">Interface available in English and Indonesian, with more languages easily added via simple INI files. Community translations welcome.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Languages -->
+  <section id="languages">
+    <div class="section-label">Language Support</div>
+    <h2>Write in the language you know</h2>
+    <p class="section-desc">CE++ provides syntax highlighting and run support for a wide range of popular programming and markup languages.</p>
+    <div class="lang-list">
+      <span class="lang-pill">Python</span>
+      <span class="lang-pill">JavaScript</span>
+      <span class="lang-pill">TypeScript</span>
+      <span class="lang-pill">C / C++</span>
+      <span class="lang-pill">C#</span>
+      <span class="lang-pill">VB.NET</span>
+      <span class="lang-pill">Java</span>
+      <span class="lang-pill">Ruby</span>
+      <span class="lang-pill">Go</span>
+      <span class="lang-pill">Rust</span>
+      <span class="lang-pill">PHP</span>
+      <span class="lang-pill">HTML</span>
+      <span class="lang-pill">CSS</span>
+      <span class="lang-pill">SQL</span>
+      <span class="lang-pill">XML</span>
+      <span class="lang-pill">JSON</span>
+      <span class="lang-pill">Markdown</span>
+      <span class="lang-pill">Plain Text</span>
+    </div>
+
+    <!-- Extra screenshots grid -->
+    <div class="screenshot-grid" style="margin-top: 48px;">
+      <div class="screenshot-mini-frame">
+        <img src="img/Light_View.PNG" alt="CE++ dark theme" class="screenshot-mini-img">
+        <div class="screenshot-mini-label">Light theme</div>
+      </div>
+      <div class="screenshot-mini-frame">
+        <img src="img/Running_View.PNG" alt="CE++ dark theme" class="screenshot-mini-img">
+        <div class="screenshot-mini-label">Code Runner</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Library / Open Source -->
+  <section id="library">
+    <div class="section-label">Open Source</div>
+    <h2>Built on CodeEditorLib</h2>
+    <p class="section-desc">CE++ is fully open source, and so is the library powering it. Build your own tools on top of the same foundation.</p>
+
+    <div class="lib-card">
+      <div>
+        <h3>CodeEditorLib</h3>
+        <p style="margin-bottom:12px;">
+          The core editing engine behind CE++. CodeEditorLib is an open-source .NET library providing the syntax-highlighting control, language definitions, and theme engine. It is available separately so developers can embed the same editing experience in their own Windows applications.
+        </p>
+        <p>Licensed under the MIT License. Contributions and community translations are welcome on GitHub.</p>
+      </div>
+      <div class="lib-actions">
+        <a href="https://github.com/arisohandriputra/CodeEditorLib" class="btn btn-outline" style="font-size:13px; white-space:nowrap;">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+          CodeEditorLib
+        </a>
+        <a href="https://raw.githubusercontent.com/arisohandriputra/CodeEditorLib/refs/heads/main/LICENSE" class="btn btn-outline" style="font-size:13px; white-space:nowrap;">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+          MIT License
+        </a>
+      </div>
+    </div>
+  </section>
+  <section id="shortcuts">
+    <div class="section-label">Keyboard Shortcuts</div>
+    <h2>Work faster with shortcuts</h2>
+    <p class="section-desc">CE++ follows familiar editor conventions so you can start immediately without relearning hotkeys.</p>
+    <div class="shortcuts-grid">
+      <div class="shortcut-row"><span class="shortcut-desc">New file</span><kbd>Ctrl + N</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Open file</span><kbd>Ctrl + O</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Save</span><kbd>Ctrl + S</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Save as</span><kbd>Ctrl + Shift + S</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Close tab</span><kbd>Ctrl + W</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Run file</span><kbd>F5</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Find &amp; Replace</span><kbd>Ctrl + F</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Go to line</span><kbd>Ctrl + G</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Toggle comment</span><kbd>Ctrl + /</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Undo / Redo</span><kbd>Ctrl + Z / Y</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Next / Previous tab</span><kbd>Ctrl + Tab</kbd></div>
+      <div class="shortcut-row"><span class="shortcut-desc">Zoom in / out</span><kbd>Ctrl + Scroll</kbd></div>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section id="install">
+    <div class="section-label">Getting Started</div>
+    <h2>Up and running in minutes</h2>
+    <p class="section-desc">CE++ is a standard Windows application. No dependencies required to start editing.</p>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Download the latest release</h4>
+          <p>Grab the latest <code>.exe</code> or <code>.zip</code> from the <a href="https://github.com/arisohandriputra/CodeEditorLib/releases">GitHub Releases</a> page.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Run and Install</h4>
+          <p>Run <code>CE++_Setup.exe</code> - Follow the installation process (it's not complicated) & Run.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Configure runtimes (optional)</h4>
+          <p>To use the built-in code runner, open <strong>Run → Run Settings</strong> and point CE++ to your installed runtimes (Python, Node.js, g++, etc.), or leave empty to use the system PATH.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Start coding</h4>
+          <p>Open a file with <kbd>Ctrl + O</kbd>, or create a new tab with <kbd>Ctrl + N</kbd>. CE++ auto-detects the language from the file extension.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <a href="https://github.com/arisohandriputra/CodeEditorLib/releases/download/1.1/CE++_Setup_v1.1.exe" class="btn btn-primary">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download CE++
+      </a>
+      <a href="https://github.com/arisohandriputra/CodeEditorLib/issues" class="btn btn-outline">Report an Issue</a>
+    </div>
+  </section>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <!--  -->
+        <div class="footer-logo-placeholder">
+          <img src="img/logo.png" alt="CE++" style="width:22px;height:22px;object-fit:contain;">
+        </div>
+        <span class="footer-text">CE++ by <a href="https://github.com/arisohandriputra">Ari Sohandri Putra</a></span>
+        <span class="mit-badge">MIT</span>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/arisohandriputra/CodeEditorLib">CodeEditorLib</a></li>
+        <li><a href="https://github.com/sponsors/arisohandriputra">Sponsor</a></li>
+        <li><a href="https://raw.githubusercontent.com/arisohandriputra/CodeEditorLib/refs/heads/main/LICENSE">License</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
